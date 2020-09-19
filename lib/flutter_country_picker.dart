@@ -1,12 +1,15 @@
 import 'dart:async';
+
+import 'package:diacritic/diacritic.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+
 import 'country.dart';
-import 'package:diacritic/diacritic.dart';
 
 export 'country.dart';
 
 const _platform = const MethodChannel('biessek.rocks/flutter_country_picker');
+
 Future<List<Country>> _fetchLocalizedCountryNames() async {
   List<Country> renamed = new List();
   Map result;
@@ -101,7 +104,15 @@ class CountryPicker extends StatelessWidget {
         ],
       ),
       onTap: () {
-        _selectCountry(context, displayCountry);
+        Navigator.of(context)
+            .push(MaterialPageRoute(
+          builder: (context) => _CountryPickerDialog(),
+        ))
+            .then((country) {
+          if (country != null) {
+            onChanged(country);
+          }
+        });
       },
     );
   }
@@ -125,36 +136,18 @@ class CountryPicker extends StatelessWidget {
         ],
       ),
       onTap: () {
-        _selectCountry(context, displayCountry);
+        Navigator.of(context)
+            .push(MaterialPageRoute(
+          builder: (context) => _CountryPickerDialog(),
+        ))
+            .then((country) {
+          if (country != null) {
+            onChanged(country);
+          }
+        });
       },
     );
   }
-
-  Future<Null> _selectCountry(
-      BuildContext context, Country defaultCountry) async {
-    final Country picked = await showCountryPicker(
-      context: context,
-      defaultCountry: defaultCountry,
-    );
-
-    if (picked != null && picked != selectedCountry) onChanged(picked);
-  }
-}
-
-/// Display an [Dialog] with the country list to selection
-/// you can pass and [defaultCountry], see [Country.findByIsoCode]
-Future<Country> showCountryPicker({
-  BuildContext context,
-  Country defaultCountry,
-}) async {
-  assert(Country.findByIsoCode(defaultCountry.isoCode) != null);
-
-  return await showDialog<Country>(
-    context: context,
-    builder: (BuildContext context) => _CountryPickerDialog(
-      defaultCountry: defaultCountry,
-    ),
-  );
 }
 
 class _CountryPickerDialog extends StatefulWidget {
@@ -204,71 +197,73 @@ class _CountryPickerDialogState extends State<_CountryPickerDialog> {
       appBar: AppBar(
         title: Text("Select Country"),
       ),
-      body: Column(
-        children: <Widget>[
-          new TextField(
-            decoration: new InputDecoration(
-              hintText: MaterialLocalizations.of(context).searchFieldLabel,
-              prefixIcon: Icon(Icons.search),
-              suffixIcon: filter == null || filter == ""
-                  ? Container(
-                      height: 0.0,
-                      width: 0.0,
-                    )
-                  : InkWell(
-                      child: Icon(Icons.clear),
-                      onTap: () {
-                        controller.clear();
-                      },
-                    ),
+      body: SafeArea(
+        child: Column(
+          children: <Widget>[
+            new TextField(
+              decoration: new InputDecoration(
+                hintText: MaterialLocalizations.of(context).searchFieldLabel,
+                prefixIcon: Icon(Icons.search),
+                suffixIcon: filter == null || filter == ""
+                    ? Container(
+                        height: 0.0,
+                        width: 0.0,
+                      )
+                    : InkWell(
+                        child: Icon(Icons.clear),
+                        onTap: () {
+                          controller.clear();
+                        },
+                      ),
+              ),
+              controller: controller,
             ),
-            controller: controller,
-          ),
-          Expanded(
-            child: Scrollbar(
-              child: ListView.builder(
-                itemCount: countries.length,
-                itemBuilder: (BuildContext context, int index) {
-                  Country country = countries[index];
-                  if (filter == null ||
-                      filter == "" ||
-                      country.name
-                          .toLowerCase()
-                          .contains(filter.toLowerCase()) ||
-                      country.isoCode.contains(filter)) {
-                    return InkWell(
-                      child: ListTile(
-                        trailing: Text("+ ${country.dialingCode}"),
-                        title: Row(
-                          children: <Widget>[
-                            Image.asset(
-                              country.asset,
-                              package: "flutter_country_picker",
-                            ),
-                            Expanded(
-                              child: Container(
-                                margin: EdgeInsets.only(left: 8.0),
-                                child: Text(
-                                  country.name,
-                                  maxLines: 2,
-                                  overflow: TextOverflow.ellipsis,
+            Expanded(
+              child: Scrollbar(
+                child: ListView.builder(
+                  itemCount: countries.length,
+                  itemBuilder: (BuildContext context, int index) {
+                    Country country = countries[index];
+                    if (filter == null ||
+                        filter == "" ||
+                        country.name
+                            .toLowerCase()
+                            .contains(filter.toLowerCase()) ||
+                        country.isoCode.contains(filter)) {
+                      return InkWell(
+                        child: ListTile(
+                          trailing: Text("+ ${country.dialingCode}"),
+                          title: Row(
+                            children: <Widget>[
+                              Image.asset(
+                                country.asset,
+                                package: "flutter_country_picker",
+                              ),
+                              Expanded(
+                                child: Container(
+                                  margin: EdgeInsets.only(left: 8.0),
+                                  child: Text(
+                                    country.name,
+                                    maxLines: 2,
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
                                 ),
                               ),
-                            ),
-                          ],
+                            ],
+                          ),
                         ),
-                      ),
-                      onTap: () {
-                        Navigator.pop(context, country);
-                      },
-                    );
-                  }
-                  return Container();
-                },
+                        onTap: () {
+                          Navigator.pop(context, country);
+                        },
+                      );
+                    }
+                    return Container();
+                  },
+                ),
               ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
