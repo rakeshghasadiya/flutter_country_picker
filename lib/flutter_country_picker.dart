@@ -152,8 +152,8 @@ Future<Country> showCountryPicker({
   return await showDialog<Country>(
     context: context,
     builder: (BuildContext context) => _CountryPickerDialog(
-          defaultCountry: defaultCountry,
-        ),
+      defaultCountry: defaultCountry,
+    ),
   );
 }
 
@@ -199,74 +199,76 @@ class _CountryPickerDialogState extends State<_CountryPickerDialog> {
 
   @override
   Widget build(BuildContext context) {
-    return Material(
-      child: Dialog(
-        child: Column(
-          children: <Widget>[
-            new TextField(
-              decoration: new InputDecoration(
-                hintText: MaterialLocalizations.of(context).searchFieldLabel,
-                prefixIcon: Icon(Icons.search),
-                suffixIcon: filter == null || filter == ""
-                    ? Container(
-                        height: 0.0,
-                        width: 0.0,
-                      )
-                    : InkWell(
-                        child: Icon(Icons.clear),
-                        onTap: () {
-                          controller.clear();
-                        },
-                      ),
-              ),
-              controller: controller,
+    return Scaffold(
+      backgroundColor: Colors.white,
+      appBar: AppBar(
+        title: Text("Select Country"),
+      ),
+      body: Column(
+        children: <Widget>[
+          new TextField(
+            decoration: new InputDecoration(
+              hintText: MaterialLocalizations.of(context).searchFieldLabel,
+              prefixIcon: Icon(Icons.search),
+              suffixIcon: filter == null || filter == ""
+                  ? Container(
+                      height: 0.0,
+                      width: 0.0,
+                    )
+                  : InkWell(
+                      child: Icon(Icons.clear),
+                      onTap: () {
+                        controller.clear();
+                      },
+                    ),
             ),
-            Expanded(
-              child: Scrollbar(
-                child: ListView.builder(
-                  itemCount: countries.length,
-                  itemBuilder: (BuildContext context, int index) {
-                    Country country = countries[index];
-                    if (filter == null ||
-                        filter == "" ||
-                        country.name
-                            .toLowerCase()
-                            .contains(filter.toLowerCase()) ||
-                        country.isoCode.contains(filter)) {
-                      return InkWell(
-                        child: ListTile(
-                          trailing: Text("+ ${country.dialingCode}"),
-                          title: Row(
-                            children: <Widget>[
-                              Image.asset(
-                                country.asset,
-                                package: "flutter_country_picker",
-                              ),
-                              Expanded(
-                                child: Container(
-                                  margin: EdgeInsets.only(left: 8.0),
-                                  child: Text(
-                                    country.name,
-                                    maxLines: 2,
-                                    overflow: TextOverflow.ellipsis,
-                                  ),
+            controller: controller,
+          ),
+          Expanded(
+            child: Scrollbar(
+              child: ListView.builder(
+                itemCount: countries.length,
+                itemBuilder: (BuildContext context, int index) {
+                  Country country = countries[index];
+                  if (filter == null ||
+                      filter == "" ||
+                      country.name
+                          .toLowerCase()
+                          .contains(filter.toLowerCase()) ||
+                      country.isoCode.contains(filter)) {
+                    return InkWell(
+                      child: ListTile(
+                        trailing: Text("+ ${country.dialingCode}"),
+                        title: Row(
+                          children: <Widget>[
+                            Image.asset(
+                              country.asset,
+                              package: "flutter_country_picker",
+                            ),
+                            Expanded(
+                              child: Container(
+                                margin: EdgeInsets.only(left: 8.0),
+                                child: Text(
+                                  country.name,
+                                  maxLines: 2,
+                                  overflow: TextOverflow.ellipsis,
                                 ),
                               ),
-                            ],
-                          ),
+                            ),
+                          ],
                         ),
-                        onTap: () {
-                          Navigator.pop(context, country);
-                        },
-                      );
-                    }
-                    return Container();
-                  },
-                ),
+                      ),
+                      onTap: () {
+                        Navigator.pop(context, country);
+                      },
+                    );
+                  }
+                  return Container();
+                },
               ),
             ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }
